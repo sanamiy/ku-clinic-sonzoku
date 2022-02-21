@@ -4,11 +4,12 @@
   src: url("/assets/fonts/Feather.ttf") format("truetype");
 } */
 :root {
-  --input-bg: theme(colors.gray.200);
+  --input-bg: theme(colors.gray.300);
   --input-ph: theme(colors.gray.500);
-  --button-disable: theme(colors.gray.400);
+  --button-disable: theme(colors.gray.500);
   --button-disable-text: theme(colors.white);
   --text: theme(colors.gray.700);
+  --primary-color: theme(colors.primary.300);
 }
 
 :root.dark-mode {
@@ -17,6 +18,7 @@
   --button-disable: theme(colors.primary.900);
   --button-disable-text: theme(colors.primary.700);
   --text: theme(colors.gray.300);
+  --primary-color: theme(colors.primary.700);
 }
 
 h1 {
@@ -48,13 +50,13 @@ h1 {
   width: 20em;
   height: 2em;
   outline: none;
-  border: none;
   box-sizing: border-box;
+  border: none;
   border-radius: 0.4em;
   display: block;
   background-color: var(--input-bg);
   padding: 0 0.6em;
-  margin: 0.1em 0em 0.6em 0;
+  margin: 0.6em 0;
 }
 
 .input-gray::placeholder {
@@ -66,8 +68,8 @@ h1 {
   height: 2em;
   margin: 1em 0;
   border-radius: 0.4em;
-  width: 9em;
   border: none;
+  padding: 0 0.6em;
   outline: none;
   background: theme("colors.primary.500");
   color: white;

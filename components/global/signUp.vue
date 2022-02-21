@@ -1,8 +1,7 @@
 <template>
   <div>
     <form class="form-signup" @submit.prevent="createUser">
-      <div>
-      <label for="signup-email" class="label">学内メールアドレス</label>
+      <label for="signup-email" class="label">メールアドレス</label>
       <input
         id="signup-email"
         v-model="email"
@@ -13,72 +12,63 @@
         autocomplete="email"
         required
       />
-      </div>
-
-      <div>
-      <label for="signup-password1" class="label">パスワード(8文字以上)</label>
-      <input
-        id="signup-password1"
-        v-model="password1"
-        class="input-gray"
-        type="password"
-        minlength="8"
-        required
-      />
-      </div>
-
-      <div>
-      <label for="signup-password2" class="label">パスワード確認</label>
-      <input
-        id="signup-password2"
-        v-model="password2"
-        class="input-gray"
-        type="password"
-        minlength="8"
-        required
-      />
-      </div>
-
-      <button type="submit" class="button-submit">アカウント作成</button>
+      <button type="submit" class="button-submit">署名用リンクを送信</button>
     </form>
-    </div>
+  </div>
 </template>
 
 <script>
 export default {
   data: () => ({
     email: "",
-    password1: "",
-    password2: "",
+    randomPassword:"",
+    isNewAccount: ""
   }),
   methods: {
+    async isEmailRegistered(email){
+      const signInMethods = await this.$fire.auth.fetchSignInMethodsForEmail(email)
+      return signInMethods.indexOf(this.$fire.auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD) == -1
+    },
     async createUser() {
-      if (this.password1 !== this.password2) {
-        this.$toast.error("パスワードが一致しません")
-        return
-      }
-      const continueUrl = process.env.baseUrl + '/signature'
+      const continueUrl = process.env.baseUrl + `/signature-edit`
       const actionCodeSettings = {
         url: continueUrl,
-        handleCodeInApp: false,
+        handleCodeInApp: true
       }
-      try {
-        this.$toast.info("少々お待ちください")
-        await this.$fire.auth
-          .createUserWithEmailAndPassword(
-            this.email,
-            this.password1
-          )
-        const {user} = await this.$fire.auth.signInWithEmailAndPassword(this.email, this.password1)
-        await user.updateProfile({displayName: '署名にご協力いただく皆'})
-        await user.sendEmailVerification(actionCodeSettings)
-        this.$toast.clear()
-        this.$toast.success('メールを送信しました。メール内のリンクをクリックしアカウントを有効化してください')
-        this.$router.push('/signature')
-      } catch (error){
-        this.$toast.error(error.message)
-      }
-    }
-  }
+      // アカウントが作成済かを調べる
+      this.$fire.auth.fetchSignInMethodsForEmail(this.email)
+       .then((signInMethods)=>{
+         console.log(this.$fire.auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD)
+          if ( signInMethods.indexOf(this.$fire.auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD) == -1){
+            this.isNewAccount = true
+          } else {
+            this.isNewAccount =false
+          }
+       }).then(()=>{
+         //アカウントが作成済みの場合
+          if (this.isNewAccount == true ){
+            this.$toast.info("アカウントを新規作成します。少々お待ち下さい")
+            this.randomPassword = Math.random().toString(30).slice(2)
+            this.$fire.auth.createUserWithEmailAndPassword(
+                this.email,
+                this.randomPassword
+                // ユーザー名を設定する
+            ).then((user)=> {
+              user.updateProfile({ displayName: "署名にご協力くださる皆" })
+            }).catch((error)=>{
+              this.$toast.error(error)
+            })
+       }}).then(()=>{
+         // アカウントを作成ののち、またはアカウントが存在していた場合はそのまま、サインインリンクを送信する
+         this.$fire.auth.sendSignInLinkToEmail(this.email, actionCodeSettings)
+       }).then((res)=>{
+            this.$toast.success('メールを送信しました。メール内のリンクからログインしてください')
+            this.$router.push(`/signature?accountCreated=1`)
+       }).catch((error)=>{
+            console.log(error)
+            this.$toast.error(error.message)
+          })
+    }}
 }
+
 </script>

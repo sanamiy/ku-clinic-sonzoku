@@ -1,6 +1,6 @@
 <template>
 <div>
-    <form class="form-signin" @submit.prevent="signInUser">
+    <form class="form-signin" @submit.prevent="signInWithLink">
       <div>
       <label for="signin-email" class="label">メールアドレス</label>
       <input
@@ -11,17 +11,6 @@
         pattern=".+@(.+\.kyoto-u\.ac\.jp|kyoto-u\.ac\.jp|kyoto-u\.jp)"
         placeholder="kyoto-u.ac.jp / kyoto-u.jp"
         autocomplete="email"
-        required
-      />
-      </div>
-      <div>
-      <label for="signin-password" class="label">パスワード</label>
-      <input
-        id="signin-password"
-        v-model="password"
-        class="input-gray"
-        type="password"
-        minlength="8"
         required
       />
       </div>
@@ -39,23 +28,17 @@ export default {
     uid: ""
   }),
   methods: {
-    signInUser() {
-      this.$fire.auth
-        .signInWithEmailAndPassword(
-          this.email,
-          this.password
-        )
-        .then((user) => {
-          if (user.emailVerified == false){
-            this.$toast.warn("送信済みのメールよりアドレスを認証してください")
-          }
-          this.$toast.clear()
+    signInWithLink() {
+      if(this.$fire.auth.isSignInWithEmailLink(window.location.href)){
+        this.email = this.$router.currentRoute.params.name
+        this.$fire.auth.signInWithEmailLink(email, window.location.href)
+        .then(() => {
           this.$toast.success('ログインしました')
-          this.$router.push('/signature')
         })
         .catch((error) => {
           this.$toast.error(error.message)
         })
+      } 
     },
   },
 }

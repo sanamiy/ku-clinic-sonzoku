@@ -20,7 +20,8 @@ export default theme({
     duration: 5000
   },
   env:{
-    baseUrl: process.env.BASE_URL
+    herokuUrl: 'https://' + process.env.HEROKU_APP_NAME + '.herokuapp.com',
+    baseUrl: process.env.BASE_URL || 'https://' + process.env.HEROKU_APP_NAME + '.herokuapp.com'
   },
   firebase: {
     config: { 

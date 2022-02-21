@@ -1,5 +1,17 @@
 {
   "functions": {
     "source": "functions"
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "*"
+    ],
+    "appAssociation": "AUTO",
+    "rewrites": [
+    {
+      "source": "/**",
+      "dynamicLinks": true
+    }]
   }
 }

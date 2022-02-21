@@ -1,8 +1,7 @@
 <template>
 <div>
-  <div v-if="!isLoggedIn">ログインしてください</div>
-  <div v-if="isLoggedIn && !isVerified">メールボックスを確認してメールアドレスを有効化してください</div>
-  <div v-if="isLoggedIn && isVerified">
+  <div v-if="!isLoggedIn">先にログインを完了してください</div>
+  <div v-if="isLoggedIn">
     <form class="form-signin" @submit.prevent="updateSignature">
       <div class="radios">
         <div v-if="this.emailType !== '同窓生'">
@@ -61,7 +60,6 @@
   </div>
   </div>
 </template>
-
 <script>
 import Vue from "vue";
 import vSelect from 'vue-select'
@@ -83,8 +81,21 @@ export default {
     uid: ""
   }),
   async beforeMount(){
+    // ログインする
+    if(this.$fire.auth.isSignInWithEmailLink(window.location.href)){
+        this.email = this.$router.currentRoute.params.name
+        this.$fire.auth.signInWithEmailLink(email, window.location.href)
+        .then(() => {
+          this.$toast.success('ログインしました')
+        })
+        .catch((error) => {
+          this.$toast.error(error.message)
+        })
+    }
+    // ログイン済みかどうかを調べる
     this.$fire.auth.onAuthStateChanged((user) => {
       if (user == null) { return }
+      // ログイン済みの場合ユーザー情報を取得する
       this.isLoggedIn = true
       if (user.emailVerified == false){ return }
       this.isVerified = true

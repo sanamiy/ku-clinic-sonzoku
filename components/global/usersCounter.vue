@@ -12,15 +12,15 @@
 <script>
 export default {
   data: () => ({
-    usersCount: ""
+    usersCount: "~"
   }),
-async beforeMount(){
+async created(){
   const usersDataRef = this.$fire.firestore.collection('usersData').doc('doc')
-      if (usersDataRef == null){ return }
-      usersDataRef.get()
-       .then((usersDataDoc)=>{
-         this.usersCount = usersDataDoc.data().usersCount
-       })
+  if (usersDataRef == null){ return }
+  usersDataRef.get()
+    .then((usersDataDoc)=>{
+      this.usersCount = usersDataDoc.data().usersCount
+    })
   }
 }
 </script>
@@ -30,7 +30,6 @@ async beforeMount(){
 }
 
 ::-webkit-progress-bar {
-  background-color: var(--button-disable);
+  background-color: var( --input-bg);
 }
-
 </style>
